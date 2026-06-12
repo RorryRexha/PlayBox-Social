@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,10 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 30,
-              vertical: 20,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
             child: Column(
               children: [
                 const SizedBox(height: 40),
@@ -41,10 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 30),
 
                 // Logo
-                Image.asset(
-                  'assets/logos/logo2.png',
-                  width: 250,
-                ),
+                Image.asset('assets/logos/logo2.png', width: 250),
 
                 const SizedBox(height: 50),
 
@@ -53,23 +48,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: emailController,
                   style: const TextStyle(color: Colors.white),
                   decoration: const InputDecoration(
-                    prefixIcon: Icon(
-                      Icons.mail_outline,
-                      color: Colors.white70,
-                    ),
+                    prefixIcon: Icon(Icons.mail_outline, color: Colors.white70),
                     hintText: "Correo Electrónico",
-                    hintStyle: TextStyle(
-                      color: Colors.white70,
-                    ),
+                    hintStyle: TextStyle(color: Colors.white70),
                     enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.white24,
-                      ),
+                      borderSide: BorderSide(color: Colors.white24),
                     ),
                     focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.cyanAccent,
-                      ),
+                      borderSide: BorderSide(color: Colors.cyanAccent),
                     ),
                   ),
                 ),
@@ -87,9 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: Colors.white70,
                     ),
                     hintText: "Contraseña",
-                    hintStyle: const TextStyle(
-                      color: Colors.white70,
-                    ),
+                    hintStyle: const TextStyle(color: Colors.white70),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword
@@ -104,14 +88,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                     ),
                     enabledBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.white24,
-                      ),
+                      borderSide: BorderSide(color: Colors.white24),
                     ),
                     focusedBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.cyanAccent,
-                      ),
+                      borderSide: BorderSide(color: Colors.cyanAccent),
                     ),
                   ),
                 ),
@@ -148,25 +128,17 @@ class _LoginScreenState extends State<LoginScreen> {
                 Row(
                   children: const [
                     Expanded(
-                      child: Divider(
-                        color: Colors.white24,
-                        thickness: 1,
-                      ),
+                      child: Divider(color: Colors.white24, thickness: 1),
                     ),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 10),
                       child: Text(
                         "o continúa con",
-                        style: TextStyle(
-                          color: Colors.white70,
-                        ),
+                        style: TextStyle(color: Colors.white70),
                       ),
                     ),
                     Expanded(
-                      child: Divider(
-                        color: Colors.white24,
-                        thickness: 1,
-                      ),
+                      child: Divider(color: Colors.white24, thickness: 1),
                     ),
                   ],
                 ),
@@ -184,16 +156,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                    icon: Image.asset(
-                      'assets/icons/google.png',
-                      height: 24,
-                    ),
+                    icon: Image.asset('assets/icons/google.png', height: 24),
                     label: const Text(
                       "Continuar con Google",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                      ),
+                      style: TextStyle(color: Colors.white, fontSize: 15),
                     ),
                     onPressed: () {},
                   ),
@@ -212,16 +178,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                    icon: Image.asset(
-                      'assets/icons/discord.png',
-                      height: 24,
-                    ),
+                    icon: Image.asset('assets/icons/discord.png', height: 24),
                     label: const Text(
                       "Continuar con Discord",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                      ),
+                      style: TextStyle(color: Colors.white, fontSize: 15),
                     ),
                     onPressed: () {},
                   ),
@@ -231,15 +191,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const Text(
                   "¿No tienes cuenta?",
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: Colors.white70, fontSize: 14),
                 ),
 
                 TextButton(
                   onPressed: () {
-                    // Ir a RegisterScreen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const RegisterScreen(),
+                      ),
+                    );
                   },
                   child: const Text(
                     "Crear Cuenta",
