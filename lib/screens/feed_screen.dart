@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'create_post_screen.dart';
 
 class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
@@ -11,6 +12,8 @@ class _FeedScreenState extends State<FeedScreen>
     with SingleTickerProviderStateMixin {
 
   late TabController _tabController;
+
+  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -26,6 +29,23 @@ class _FeedScreenState extends State<FeedScreen>
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  void _onItemTapped(int index) {
+
+    if (index == 2) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const CreatePostScreen(),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   @override
@@ -53,7 +73,7 @@ class _FeedScreenState extends State<FeedScreen>
               Icons.notifications_none,
               color: Colors.white,
             ),
-          )
+          ),
         ],
 
         bottom: TabBar(
@@ -79,11 +99,13 @@ class _FeedScreenState extends State<FeedScreen>
       ),
 
       bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
         backgroundColor: Colors.black,
         type: BottomNavigationBarType.fixed,
-
         selectedItemColor: Colors.cyanAccent,
         unselectedItemColor: Colors.white54,
+
+        onTap: _onItemTapped,
 
         items: const [
           BottomNavigationBarItem(
@@ -97,7 +119,10 @@ class _FeedScreenState extends State<FeedScreen>
           ),
 
           BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle),
+            icon: Icon(
+              Icons.add_circle,
+              size: 35,
+            ),
             label: "",
           ),
 
@@ -119,31 +144,30 @@ class _FeedScreenState extends State<FeedScreen>
     return ListView(
       padding: const EdgeInsets.all(12),
       children: [
-
         Card(
           color: const Color(0xFF0F172A),
 
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-              ListTile(
-                leading: const CircleAvatar(
-                  backgroundImage:
-                      AssetImage('assets/images/avatar1.png'),
+              const ListTile(
+                leading: CircleAvatar(
+                  backgroundImage: AssetImage(
+                    'assets/images/avatar1.png',
+                  ),
                 ),
 
-                title: const Text(
+                title: Text(
                   "RodrigoGamer",
                   style: TextStyle(color: Colors.white),
                 ),
 
-                subtitle: const Text(
+                subtitle: Text(
                   "Hace 2 horas",
                   style: TextStyle(color: Colors.white54),
                 ),
 
-                trailing: const Icon(
+                trailing: Icon(
                   Icons.more_vert,
                   color: Colors.white,
                 ),
@@ -166,7 +190,6 @@ class _FeedScreenState extends State<FeedScreen>
                 padding: EdgeInsets.symmetric(horizontal: 12),
                 child: Row(
                   children: [
-
                     Icon(
                       Icons.favorite_border,
                       color: Colors.white,
@@ -196,7 +219,7 @@ class _FeedScreenState extends State<FeedScreen>
                 ),
               ),
 
-              const SizedBox(height: 15),
+              SizedBox(height: 15),
             ],
           ),
         ),
