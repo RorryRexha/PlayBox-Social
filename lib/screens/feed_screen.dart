@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'create_post_screen.dart';
+import 'profile_screen.dart';
 
 class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
@@ -10,7 +11,6 @@ class FeedScreen extends StatefulWidget {
 
 class _FeedScreenState extends State<FeedScreen>
     with SingleTickerProviderStateMixin {
-
   late TabController _tabController;
 
   int _selectedIndex = 0;
@@ -19,10 +19,7 @@ class _FeedScreenState extends State<FeedScreen>
   void initState() {
     super.initState();
 
-    _tabController = TabController(
-      length: 3,
-      vsync: this,
-    );
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -32,13 +29,18 @@ class _FeedScreenState extends State<FeedScreen>
   }
 
   void _onItemTapped(int index) {
-
     if (index == 2) {
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => const CreatePostScreen(),
-        ),
+        MaterialPageRoute(builder: (context) => const CreatePostScreen()),
+      );
+      return;
+    }
+
+    if (index == 4) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const ProfileScreen()),
       );
       return;
     }
@@ -69,10 +71,7 @@ class _FeedScreenState extends State<FeedScreen>
         actions: [
           IconButton(
             onPressed: () {},
-            icon: const Icon(
-              Icons.notifications_none,
-              color: Colors.white,
-            ),
+            icon: const Icon(Icons.notifications_none, color: Colors.white),
           ),
         ],
 
@@ -91,11 +90,7 @@ class _FeedScreenState extends State<FeedScreen>
 
       body: TabBarView(
         controller: _tabController,
-        children: [
-          _buildFeed(),
-          _buildFeed(),
-          _buildFeed(),
-        ],
+        children: [_buildFeed(), _buildFeed(), _buildFeed()],
       ),
 
       bottomNavigationBar: BottomNavigationBar(
@@ -113,16 +108,10 @@ class _FeedScreenState extends State<FeedScreen>
             label: "Inicio",
           ),
 
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: "Buscar",
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: "Buscar"),
 
           BottomNavigationBarItem(
-            icon: Icon(
-              Icons.add_circle,
-              size: 35,
-            ),
+            icon: Icon(Icons.add_circle, size: 35),
             label: "",
           ),
 
@@ -152,9 +141,7 @@ class _FeedScreenState extends State<FeedScreen>
             children: [
               const ListTile(
                 leading: CircleAvatar(
-                  backgroundImage: AssetImage(
-                    'assets/images/avatar1.png',
-                  ),
+                  backgroundImage: AssetImage('assets/images/avatar1.png'),
                 ),
 
                 title: Text(
@@ -167,16 +154,10 @@ class _FeedScreenState extends State<FeedScreen>
                   style: TextStyle(color: Colors.white54),
                 ),
 
-                trailing: Icon(
-                  Icons.more_vert,
-                  color: Colors.white,
-                ),
+                trailing: Icon(Icons.more_vert, color: Colors.white),
               ),
 
-              Image.asset(
-                'assets/images/post1.png',
-                fit: BoxFit.cover,
-              ),
+              Image.asset('assets/images/post1.png', fit: BoxFit.cover),
 
               const Padding(
                 padding: EdgeInsets.all(12),
@@ -190,31 +171,19 @@ class _FeedScreenState extends State<FeedScreen>
                 padding: EdgeInsets.symmetric(horizontal: 12),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.favorite_border,
-                      color: Colors.white,
-                    ),
+                    Icon(Icons.favorite_border, color: Colors.white),
 
                     SizedBox(width: 5),
 
-                    Text(
-                      "128",
-                      style: TextStyle(color: Colors.white),
-                    ),
+                    Text("128", style: TextStyle(color: Colors.white)),
 
                     SizedBox(width: 20),
 
-                    Icon(
-                      Icons.chat_bubble_outline,
-                      color: Colors.white,
-                    ),
+                    Icon(Icons.chat_bubble_outline, color: Colors.white),
 
                     SizedBox(width: 5),
 
-                    Text(
-                      "24",
-                      style: TextStyle(color: Colors.white),
-                    ),
+                    Text("24", style: TextStyle(color: Colors.white)),
                   ],
                 ),
               ),
