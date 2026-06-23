@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
+import 'feed_screen.dart';
+import '../services/session_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -13,15 +15,27 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(
-      const Duration(seconds: 3),
-      () {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
-        );
-      },
-    );
+    _checkSession();
+  }
+
+  Future<void> _checkSession() async {
+    await Future.delayed(const Duration(seconds: 2)); // animación splash
+
+    final loggedIn = await SessionService.isLoggedIn();
+
+    if (!mounted) return;
+
+    if (loggedIn) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const FeedScreen()),
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+    }
   }
 
   @override
@@ -32,15 +46,13 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Logo principal
             Image.asset(
-              'assets/logos/playbox_logo.png', // coloca aquí tu logo en PNG
+              'assets/logos/playbox_logo.png',
               width: 150,
             ),
 
             const SizedBox(height: 30),
 
-            // Nombre de la app
             const Text(
               "PLAY BOX SOCIAL",
               style: TextStyle(
@@ -53,13 +65,11 @@ class _SplashScreenState extends State<SplashScreen> {
 
             const SizedBox(height: 10),
 
-            // Eslogan principal
             const Text(
               "Conecta. Comparte. Juega.",
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 16,
-                fontWeight: FontWeight.w500,
               ),
             ),
 

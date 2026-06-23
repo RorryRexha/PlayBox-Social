@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'register_screen.dart';
 import 'feed_screen.dart';
+import '../services/auth_service.dart';
+import '../services/session_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -14,6 +16,61 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController passwordController = TextEditingController();
 
   bool _obscurePassword = true;
+  bool _isLoading = false;
+
+  // =========================
+  // 🔐 LOGIN
+  // =========================
+  Future<void> _login() async {
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      _showMessage("Completa todos los campos");
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    final result = await AuthService.login(
+      email: email,
+      password: password,
+    );
+
+    setState(() => _isLoading = false);
+
+    if (result["success"] == true) {
+      // 🔥 Seguridad extra: aseguramos sesión activa
+      final isLogged = await SessionService.isLoggedIn();
+
+      if (isLogged) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const FeedScreen()),
+        );
+      } else {
+        _showMessage("Error al guardar sesión");
+      }
+    } else {
+      _showMessage(result["message"] ?? "Error al iniciar sesión");
+    }
+  }
+
+  // =========================
+  // 📢 MENSAJE
+  // =========================
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +84,6 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 const SizedBox(height: 40),
 
-                // Título
                 const Text(
                   "Play Box Social",
                   style: TextStyle(
@@ -39,12 +95,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 30),
 
-                // Logo
                 Image.asset('assets/logos/logo2.png', width: 250),
 
                 const SizedBox(height: 50),
 
-                // Campo correo
+                // EMAIL
                 TextField(
                   controller: emailController,
                   style: const TextStyle(color: Colors.white),
@@ -63,16 +118,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 25),
 
-                // Campo contraseña
+                // PASSWORD
                 TextField(
                   controller: passwordController,
                   obscureText: _obscurePassword,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    prefixIcon: const Icon(
-                      Icons.lock_outline,
-                      color: Colors.white70,
-                    ),
+                    prefixIcon: const Icon(Icons.lock_outline, color: Colors.white70),
                     hintText: "Contraseña",
                     hintStyle: const TextStyle(color: Colors.white70),
                     suffixIcon: IconButton(
@@ -99,45 +151,42 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 40),
 
-                // Botón Login
+                // BOTÓN LOGIN
                 SizedBox(
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF18A8F6),
-                      elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const FeedScreen(),
-                        ),
-                      );
-                    },
-                    child: const Text(
-                      "Iniciar sesión",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+                    onPressed: _isLoading ? null : _login,
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            "Iniciar sesión",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 17,
+                            ),
+                          ),
                   ),
                 ),
 
                 const SizedBox(height: 35),
 
-                // Separador
                 Row(
                   children: const [
-                    Expanded(
-                      child: Divider(color: Colors.white24, thickness: 1),
-                    ),
+                    Expanded(child: Divider(color: Colors.white24)),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 10),
                       child: Text(
@@ -145,15 +194,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: TextStyle(color: Colors.white70),
                       ),
                     ),
-                    Expanded(
-                      child: Divider(color: Colors.white24, thickness: 1),
-                    ),
+                    Expanded(child: Divider(color: Colors.white24)),
                   ],
                 ),
 
                 const SizedBox(height: 25),
 
-                // Google
+                // GOOGLE
                 SizedBox(
                   width: double.infinity,
                   height: 55,
@@ -165,17 +212,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     icon: Image.asset('assets/icons/google.png', height: 24),
-                    label: const Text(
-                      "Continuar con Google",
-                      style: TextStyle(color: Colors.white, fontSize: 15),
-                    ),
+                    label: const Text("Continuar con Google"),
                     onPressed: () {},
                   ),
                 ),
 
                 const SizedBox(height: 15),
 
-                // Discord
+                // DISCORD
                 SizedBox(
                   width: double.infinity,
                   height: 55,
@@ -187,10 +231,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     icon: Image.asset('assets/icons/discord.png', height: 24),
-                    label: const Text(
-                      "Continuar con Discord",
-                      style: TextStyle(color: Colors.white, fontSize: 15),
-                    ),
+                    label: const Text("Continuar con Discord"),
                     onPressed: () {},
                   ),
                 ),
@@ -199,7 +240,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const Text(
                   "¿No tienes cuenta?",
-                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                  style: TextStyle(color: Colors.white70),
                 ),
 
                 TextButton(
@@ -207,7 +248,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const RegisterScreen(),
+                        builder: (_) => const RegisterScreen(),
                       ),
                     );
                   },
@@ -216,12 +257,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(
                       color: Colors.cyanAccent,
                       fontSize: 16,
-                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-
-                const SizedBox(height: 20),
               ],
             ),
           ),

@@ -1,4 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import '../services/post_service.dart';
 
 class CreatePostScreen extends StatefulWidget {
   const CreatePostScreen({super.key});
@@ -8,14 +11,90 @@ class CreatePostScreen extends StatefulWidget {
 }
 
 class _CreatePostScreenState extends State<CreatePostScreen> {
-
-  final TextEditingController descriptionController =
-      TextEditingController();
-
-  final TextEditingController tagsController =
-      TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
 
   String selectedGame = "Ghost of Tsushima";
+  bool _loading = false;
+
+  File? _image;
+  final ImagePicker _picker = ImagePicker();
+
+  final Map<String, int> gameMap = {
+    "Ghost of Tsushima": 1,
+    "Elden Ring": 2,
+    "Warzone": 3,
+  };
+
+  // =========================
+  // 📸 PICK IMAGE
+  // =========================
+  Future<void> _pickImage() async {
+    final picked = await _picker.pickImage(source: ImageSource.gallery);
+
+    if (picked != null) {
+      setState(() {
+        _image = File(picked.path);
+      });
+    }
+  }
+
+  // =========================
+  // 📤 CREATE POST + MEDIA FLOW
+  // =========================
+  Future<void> _publishPost() async {
+    final description = descriptionController.text.trim();
+
+    if (description.isEmpty && _image == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Agrega texto o imagen")),
+      );
+      return;
+    }
+
+    setState(() => _loading = true);
+
+    try {
+      final gameId = gameMap[selectedGame];
+
+      // 1️⃣ Crear post
+      final postResult = await PostService.createPost(
+        description: description,
+        gameId: gameId?.toString(),
+      );
+
+      if (postResult["success"] != true) {
+        throw Exception(postResult["message"]);
+      }
+
+      final postId = postResult["data"]["post"]["id"];
+
+      // 2️⃣ Subir media si existe
+      if (_image != null) {
+        final mediaResult = await PostService.uploadMedia(
+          postId: postId,
+          file: _image!,
+        );
+
+        if (mediaResult["success"] != true) {
+          throw Exception(mediaResult["message"]);
+        }
+      }
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("🔥 Post publicado")),
+      );
+
+      Navigator.pop(context, true);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
+    }
+
+    setState(() => _loading = false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,19 +104,11 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
-
         leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: const Icon(
-            Icons.close,
-            color: Colors.white,
-          ),
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.close, color: Colors.white),
         ),
-
         centerTitle: true,
-
         title: const Text(
           "Nueva publicación",
           style: TextStyle(
@@ -49,114 +120,45 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
-
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
             const Text(
-              "1. Selecciona tu contenido",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w500,
-              ),
+              "1. Imagen",
+              style: TextStyle(color: Colors.white),
             ),
 
             const SizedBox(height: 15),
 
-            Row(
-              children: [
-
-                Expanded(
-                  child: Container(
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.image_outlined,
-                          color: Colors.cyanAccent,
-                        ),
-
-                        SizedBox(width: 8),
-
-                        Text(
-                          "Imagen",
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+            GestureDetector(
+              onTap: _pickImage,
+              child: Container(
+                height: 220,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0F172A),
+                  borderRadius: BorderRadius.circular(15),
                 ),
-
-                const SizedBox(width: 15),
-
-                Expanded(
-                  child: Container(
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.play_circle_outline,
-                          color: Colors.purpleAccent,
+                child: _image == null
+                    ? const Center(
+                        child: Text(
+                          "Toca para seleccionar imagen",
+                          style: TextStyle(color: Colors.white54),
                         ),
-
-                        SizedBox(width: 8),
-
-                        Text(
-                          "Video",
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 25),
-
-            Container(
-              height: 220,
-              width: double.infinity,
-
-              decoration: BoxDecoration(
-                color: const Color(0xFF0F172A),
-                borderRadius: BorderRadius.circular(15),
-              ),
-
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(15),
-                child: Image.asset(
-                  "assets/images/post1.png",
-                  fit: BoxFit.cover,
-                ),
+                      )
+                    : ClipRRect(
+                        borderRadius: BorderRadius.circular(15),
+                        child: Image.file(_image!, fit: BoxFit.cover),
+                      ),
               ),
             ),
 
             const SizedBox(height: 25),
 
             const Text(
-              "2. Escribe una descripción",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w500,
-              ),
+              "2. Descripción",
+              style: TextStyle(color: Colors.white),
             ),
 
             const SizedBox(height: 10),
@@ -165,16 +167,11 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               controller: descriptionController,
               maxLines: 4,
               style: const TextStyle(color: Colors.white),
-
               decoration: InputDecoration(
                 hintText: "¿Qué estás jugando?",
-                hintStyle: const TextStyle(
-                  color: Colors.white54,
-                ),
-
+                hintStyle: const TextStyle(color: Colors.white54),
                 filled: true,
                 fillColor: const Color(0xFF0F172A),
-
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -184,50 +181,30 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             const SizedBox(height: 25),
 
             const Text(
-              "3. ¿Qué juego es?",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w500,
-              ),
+              "3. Juego",
+              style: TextStyle(color: Colors.white),
             ),
 
             const SizedBox(height: 10),
 
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 15,
-              ),
-
+              padding: const EdgeInsets.symmetric(horizontal: 15),
               decoration: BoxDecoration(
                 color: const Color(0xFF0F172A),
                 borderRadius: BorderRadius.circular(12),
               ),
-
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
-                  dropdownColor: const Color(0xFF0F172A),
                   value: selectedGame,
                   isExpanded: true,
-
-                  style: const TextStyle(
-                    color: Colors.white,
-                  ),
-
-                  items: const [
-                    DropdownMenuItem(
-                      value: "Ghost of Tsushima",
-                      child: Text("Ghost of Tsushima"),
-                    ),
-                    DropdownMenuItem(
-                      value: "Elden Ring",
-                      child: Text("Elden Ring"),
-                    ),
-                    DropdownMenuItem(
-                      value: "Warzone",
-                      child: Text("Warzone"),
-                    ),
-                  ],
-
+                  dropdownColor: const Color(0xFF0F172A),
+                  style: const TextStyle(color: Colors.white),
+                  items: gameMap.keys.map((game) {
+                    return DropdownMenuItem(
+                      value: game,
+                      child: Text(game),
+                    );
+                  }).toList(),
                   onChanged: (value) {
                     setState(() {
                       selectedGame = value!;
@@ -237,40 +214,11 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               ),
             ),
 
-            const SizedBox(height: 25),
-
-            const Text(
-              "4. Etiquetas",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-
-            const SizedBox(height: 10),
-
-            Wrap(
-              spacing: 10,
-              children: [
-
-                Chip(
-                  label: const Text("#GhostOfTsushima"),
-                  backgroundColor: Colors.grey.shade900,
-                ),
-
-                Chip(
-                  label: const Text("#PlayStation"),
-                  backgroundColor: Colors.grey.shade900,
-                ),
-              ],
-            ),
-
             const SizedBox(height: 40),
 
             SizedBox(
               width: double.infinity,
               height: 55,
-
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.cyanAccent,
@@ -278,16 +226,16 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-
-                onPressed: () {},
-
-                child: const Text(
-                  "Publicar",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                onPressed: _loading ? null : _publishPost,
+                child: _loading
+                    ? const CircularProgressIndicator(color: Colors.black)
+                    : const Text(
+                        "Publicar",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               ),
             ),
           ],
