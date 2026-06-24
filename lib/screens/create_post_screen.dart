@@ -39,62 +39,53 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   }
 
   // =========================
-  // 📤 CREATE POST + MEDIA FLOW
-  // =========================
-  Future<void> _publishPost() async {
-    final description = descriptionController.text.trim();
+Future<void> _publishPost() async {
+  final description = descriptionController.text.trim();
 
-    if (description.isEmpty && _image == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Agrega texto o imagen")),
-      );
-      return;
-    }
+  if (description.isEmpty && _image == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Agrega texto o imagen")),
+    );
+    return;
+  }
 
-    setState(() => _loading = true);
+  setState(() => _loading = true);
 
-    try {
-      final gameId = gameMap[selectedGame];
+  try {
+    final gameId = gameMap[selectedGame];
 
-      // 1️⃣ Crear post
-      final postResult = await PostService.createPost(
-        description: description,
-        gameId: gameId?.toString(),
-      );
+    final result = await PostService.createPost(
+      description: description,
+      gameId: gameId?.toString(),
+      image: _image,
+    );
 
-      if (postResult["success"] != true) {
-        throw Exception(postResult["message"]);
-      }
+    if (!mounted) return;
 
-      final postId = postResult["data"]["post"]["id"];
-
-      // 2️⃣ Subir media si existe
-      if (_image != null) {
-        final mediaResult = await PostService.uploadMedia(
-          postId: postId,
-          file: _image!,
-        );
-
-        if (mediaResult["success"] != true) {
-          throw Exception(mediaResult["message"]);
-        }
-      }
-
-      if (!mounted) return;
-
+    if (result["success"] == true) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("🔥 Post publicado")),
       );
 
       Navigator.pop(context, true);
-    } catch (e) {
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
+        SnackBar(
+          content: Text(result["message"] ?? "Error al publicar"),
+        ),
       );
     }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Error: $e")),
+    );
+  }
 
+  if (mounted) {
     setState(() => _loading = false);
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
