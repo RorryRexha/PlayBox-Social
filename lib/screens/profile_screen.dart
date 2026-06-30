@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/user_service.dart';
+import '../services/profile_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -18,10 +18,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<Map<String, dynamic>> _loadUser() async {
-    final data = await UserService.getUser();
-    return data ?? {};
+  return await ProfileService.getProfile();
   }
-
+  
   Future<void> _refresh() async {
     setState(() {
       _userFuture = _loadUser();
@@ -39,9 +38,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
-                child: CircularProgressIndicator(
-                  color: Colors.cyanAccent,
-                ),
+                child: CircularProgressIndicator(color: Colors.cyanAccent),
               );
             }
 
@@ -62,14 +59,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: Column(
                   children: [
-
                     // HEADER
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(20),
                       child: Column(
                         children: [
-
                           Align(
                             alignment: Alignment.topRight,
                             child: IconButton(
@@ -109,8 +104,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           const SizedBox(height: 5),
 
                           Text(
-                            user["bio"] ??
-                                "Vivo por y para los videojuegos.",
+                            user["bio"] ?? "Vivo por y para los videojuegos.",
                             style: const TextStyle(color: Colors.white54),
                             textAlign: TextAlign.center,
                           ),
@@ -136,10 +130,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 style: TextStyle(color: Colors.green),
                               ),
                               SizedBox(width: 20),
-                              Text(
-                                "PC",
-                                style: TextStyle(color: Colors.white),
-                              ),
+                              Text("PC", style: TextStyle(color: Colors.white)),
                             ],
                           ),
                         ],
@@ -149,22 +140,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const Divider(color: Colors.white24),
 
                     // ESTADÍSTICAS (luego las conectamos al backend)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 20),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           Column(
                             children: [
                               Text(
-                                "0",
-                                style: TextStyle(
+                                "${user["posts_count"] ?? 0}",
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 22,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              Text(
+                              const Text(
                                 "Publicaciones",
                                 style: TextStyle(color: Colors.white54),
                               ),
@@ -173,14 +164,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Column(
                             children: [
                               Text(
-                                "0",
-                                style: TextStyle(
+                                "${user["followers_count"] ?? 0}",
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 22,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              Text(
+                              const Text(
                                 "Seguidores",
                                 style: TextStyle(color: Colors.white54),
                               ),
@@ -189,14 +180,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Column(
                             children: [
                               Text(
-                                "0",
-                                style: TextStyle(
+                                "${user["following_count"] ?? 0}",
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 22,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              Text(
+                              const Text(
                                 "Siguiendo",
                                 style: TextStyle(color: Colors.white54),
                               ),
@@ -215,9 +206,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         padding: const EdgeInsets.all(12),
                         children: [
                           _gameCard("Pragmata", "assets/images/game1.jpg"),
-                          _gameCard("Resident Evil 9", "assets/images/game2.png"),
+                          _gameCard(
+                            "Resident Evil 9",
+                            "assets/images/game2.png",
+                          ),
                           _gameCard("Fortnite", "assets/images/game3.jpg"),
-                          _gameCard("The last of us Part II", "assets/images/game4.jpg"),
+                          _gameCard(
+                            "The last of us Part II",
+                            "assets/images/game4.jpg",
+                          ),
                         ],
                       ),
                     ),
@@ -263,10 +260,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const Text(
-            "Ver todos",
-            style: TextStyle(color: Colors.cyanAccent),
-          ),
+          const Text("Ver todos", style: TextStyle(color: Colors.cyanAccent)),
         ],
       ),
     );
